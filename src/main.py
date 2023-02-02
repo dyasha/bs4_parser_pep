@@ -119,7 +119,8 @@ def pep(session):
             error_msg = (f'Несовпадающие статусы:\n'
                          f'{version_link}\n'
                          f'Статус в карточке: {abbr}\n'
-                         f'Ожидаемые статусы: {EXPECTED_STATUS[status_results[idx]]}')
+                         f'Ожидаемые статусы: '
+                         f'{EXPECTED_STATUS[status_results[idx]]}')
             logging.info(error_msg)
 
     del COUNT_STATUS[1][1]
