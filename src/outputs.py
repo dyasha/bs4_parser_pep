@@ -9,12 +9,10 @@ from constants import BASE_DIR, DATETIME_FORMAT
 
 def control_output(results, cli_args):
     output = cli_args.output
-    if output == 'pretty':
-        pretty_output(results)
-    elif output == 'file':
-        file_output(results, cli_args)
+    if output == 'file':
+        OUTPUTS_COMMANDS[output](results, cli_args)
     else:
-        default_output(results)
+        OUTPUTS_COMMANDS[output](results)
 
 
 def file_output(results, cli_args):
@@ -42,3 +40,10 @@ def pretty_output(results):
     table.align = 'l'
     table.add_rows(results[1:])
     print(table)
+
+
+OUTPUTS_COMMANDS = {
+    'file': file_output,
+    'pretty': pretty_output,
+    None: default_output
+}

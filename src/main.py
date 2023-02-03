@@ -10,19 +10,15 @@ from configs import configure_argument_parser, configure_logging
 from constants import (BASE_DIR, COUNT_STATUS, EXPECTED_STATUS, MAIN_DOC_URL,
                        PARSING_PEP_URL)
 from outputs import control_output
-from utils import find_tag, get_response
+from utils import find_tag, get_response, response_is_not_none
 
 
 def whats_new(session):
     whats_new_url = urljoin(MAIN_DOC_URL, 'whatsnew/')
-    response = get_response(session, whats_new_url)
+    response = response_is_not_none(get_response(session, whats_new_url))
     soup = BeautifulSoup(response.text, features='lxml')
-    main_div = find_tag(soup, 'section', attrs={'id': 'what-s-new-in-python'})
-    div_with_ul = find_tag(main_div, 'div', attrs={'class': 'toctree-wrapper'})
-    if response is None:
-        return
-    sections_by_python = div_with_ul.find_all(
-        'li', attrs={'class': 'toctree-l1'})
+    sections_by_python = soup.select(
+        '#what-s-new-in-python div.toctree-wrapper li.toctree-l1')
     results = [('Ссылка на статью', 'Заголовок', 'Редактор, Автор')]
     for section in tqdm(sections_by_python, desc='Загружаем данные'):
         version_a_tag = section.find('a')
@@ -40,9 +36,7 @@ def whats_new(session):
 
 
 def latest_versions(session):
-    response = get_response(session, MAIN_DOC_URL)
-    if response is None:
-        return
+    response = response_is_not_none(get_response(session, MAIN_DOC_URL))
     soup = BeautifulSoup(response.text, 'lxml')
     sidebar = find_tag(soup, 'div', attrs={'class': 'sphinxsidebarwrapper'})
     ul_tags = sidebar.find_all('ul')
@@ -51,7 +45,7 @@ def latest_versions(session):
             a_tags = ul.find_all('a')
             break
     else:
-        raise Exception('Ничего не нашлось')
+        raise ValueError('Ничего не нашлось')
     results = [('Ссылка на документацию', 'Версия', 'Статус')]
     pattern = r'Python (?P<version>\d\.\d+) \((?P<status>.*)\)'
     for a_tag in a_tags:
@@ -69,9 +63,7 @@ def latest_versions(session):
 
 def download(session):
     downloads_url = urljoin(MAIN_DOC_URL, 'download.html')
-    response = get_response(session, downloads_url)
-    if response is None:
-        return
+    response = response_is_not_none(get_response(session, downloads_url))
     soup = BeautifulSoup(response.text, 'lxml')
     table_tag = soup.find(attrs={'class': 'docutils'})
     pdf_a4_tag = table_tag.find('a', {'href': re.compile(r'.+pdf-a4\.zip$')})
@@ -88,7 +80,7 @@ def download(session):
 
 
 def pep(session):
-    response = get_response(session, PARSING_PEP_URL)
+    response = response_is_not_none(get_response(session, PARSING_PEP_URL))
     soup = BeautifulSoup(response.text, 'lxml')
     table = soup.find('section', attrs={'id': 'numerical-index'})
     link_results = []
