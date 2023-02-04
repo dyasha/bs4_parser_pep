@@ -2,27 +2,24 @@ import logging
 
 from requests import RequestException
 
-from exceptions import ParserErrorPage, ParserFindTagException
+from exceptions import ParserErrorPage, ParserFindTagException, ResponseError
 
 
 def get_response(session, url):
     try:
         response = session.get(url)
         response.encoding = 'utf-8'
+        if response is None:
+            raise ResponseError()
         return response
     except RequestException:
-        logging.exception(
-            f' Возникла ошибка при загрузке страницы {url}',
-            stack_info=True
-        )
+        err_msg = f'Возникла ошибка при загрузке страницы {url}'
         raise ParserErrorPage(
-            f' Возникла ошибка при загрузке страницы {url}')
-
-
-def response_is_not_none(response):
-    if response is None:
-        return
-    return response
+            err_msg,
+            logging.exception(
+                err_msg,
+                stack_info=True
+            ))
 
 
 def find_tag(soup, tag, attrs=None):

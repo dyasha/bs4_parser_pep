@@ -10,12 +10,12 @@ from configs import configure_argument_parser, configure_logging
 from constants import (BASE_DIR, COUNT_STATUS, EXPECTED_STATUS, MAIN_DOC_URL,
                        PARSING_PEP_URL)
 from outputs import control_output
-from utils import find_tag, get_response, response_is_not_none
+from utils import find_tag, get_response
 
 
 def whats_new(session):
     whats_new_url = urljoin(MAIN_DOC_URL, 'whatsnew/')
-    response = response_is_not_none(get_response(session, whats_new_url))
+    response = get_response(session, whats_new_url)
     soup = BeautifulSoup(response.text, features='lxml')
     sections_by_python = soup.select(
         '#what-s-new-in-python div.toctree-wrapper li.toctree-l1')
@@ -36,7 +36,7 @@ def whats_new(session):
 
 
 def latest_versions(session):
-    response = response_is_not_none(get_response(session, MAIN_DOC_URL))
+    response = get_response(session, MAIN_DOC_URL)
     soup = BeautifulSoup(response.text, 'lxml')
     sidebar = find_tag(soup, 'div', attrs={'class': 'sphinxsidebarwrapper'})
     ul_tags = sidebar.find_all('ul')
@@ -63,7 +63,7 @@ def latest_versions(session):
 
 def download(session):
     downloads_url = urljoin(MAIN_DOC_URL, 'download.html')
-    response = response_is_not_none(get_response(session, downloads_url))
+    response = get_response(session, downloads_url)
     soup = BeautifulSoup(response.text, 'lxml')
     table_tag = soup.find(attrs={'class': 'docutils'})
     pdf_a4_tag = table_tag.find('a', {'href': re.compile(r'.+pdf-a4\.zip$')})
@@ -80,7 +80,7 @@ def download(session):
 
 
 def pep(session):
-    response = response_is_not_none(get_response(session, PARSING_PEP_URL))
+    response = get_response(session, PARSING_PEP_URL)
     soup = BeautifulSoup(response.text, 'lxml')
     table = soup.find('section', attrs={'id': 'numerical-index'})
     link_results = []
